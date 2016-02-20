@@ -1,0 +1,91 @@
+!_TAG_FILE_FORMAT	2	/extended format; --format=1 will not append ;" to lines/
+!_TAG_FILE_SORTED	1	/0=unsorted, 1=sorted, 2=foldcase/
+!_TAG_PROGRAM_AUTHOR	Darren Hiebert	/dhiebert@users.sourceforge.net/
+!_TAG_PROGRAM_NAME	Exuberant Ctags	//
+!_TAG_PROGRAM_URL	http://ctags.sourceforge.net	/official site/
+!_TAG_PROGRAM_VERSION	5.9~svn20110310	//
+BUF_SIZE	parse.c	21;"	d	file:
+CC	Makefile	/^CC=gcc$/;"	m
+CFLAGS	Makefile	/^CFLAGS=-g$/;"	m
+Cmd	parse.h	/^typedef struct cmd_t *Cmd;$/;"	t	typeref:struct:cmd_t
+CmdToken	parse.c	34;"	d	file:
+EOS	parse.c	22;"	d	file:
+ERR_MSG	parse.c	20;"	d	file:
+Empty	parse.c	/^static struct cmd_t Empty={Tnil, Tnil, Tnil,"","",1,1,&_empty,NULL};$/;"	v	typeref:struct:cmd_t	file:
+End	parse.c	/^static struct cmd_t End={Tnil, Tnil, Tnil,"","",1,1,&_endd,NULL};$/;"	v	typeref:struct:cmd_t	file:
+EndOfInput	parse.c	37;"	d	file:
+InCmd	parse.c	28;"	d	file:
+LA	parse.c	24;"	d	file:
+LookAhead	parse.c	/^static Token LookAhead;$/;"	v	file:
+Next	parse.c	23;"	d	file:
+OBJ	Makefile	/^OBJ=main.o parse.o$/;"	m
+PARSE_H	parse.h	12;"	d
+Pipe	parse.h	/^typedef struct pipe_t *Pipe;$/;"	t	typeref:struct:pipe_t
+PipeToken	parse.c	31;"	d	file:
+Pout	parse.h	/^typedef enum {Pout, PoutErr} Ptype;$/;"	e	enum:__anon2
+Pout	parse.h	/^typedef enum {Pout, PoutErr} Ptype;$/;"	e	enum:__anon4
+PoutErr	parse.h	/^typedef enum {Pout, PoutErr} Ptype;$/;"	e	enum:__anon2
+PoutErr	parse.h	/^typedef enum {Pout, PoutErr} Ptype;$/;"	e	enum:__anon4
+Ptype	parse.h	/^typedef enum {Pout, PoutErr} Ptype;$/;"	t	typeref:enum:__anon2
+Ptype	parse.h	/^typedef enum {Pout, PoutErr} Ptype;$/;"	t	typeref:enum:__anon4
+ReadChar	parse.c	25;"	d	file:
+SRC	Makefile	/^SRC=main.c parse.c parse.h$/;"	m
+Tamp	parse.h	/^typedef enum {Terror, Tword, Tamp, Tpipe, Tsemi, Tin, Tout,$/;"	e	enum:__anon1
+Tamp	parse.h	/^typedef enum {Terror, Tword, Tamp, Tpipe, Tsemi, Tin, Tout,$/;"	e	enum:__anon3
+Tapp	parse.h	/^	      Tapp, TpipeErr, ToutErr, TappErr, Tnl, Tnil, Tend} Token;$/;"	e	enum:__anon1
+Tapp	parse.h	/^	      Tapp, TpipeErr, ToutErr, TappErr, Tnl, Tnil, Tend} Token;$/;"	e	enum:__anon3
+TappErr	parse.h	/^	      Tapp, TpipeErr, ToutErr, TappErr, Tnl, Tnil, Tend} Token;$/;"	e	enum:__anon1
+TappErr	parse.h	/^	      Tapp, TpipeErr, ToutErr, TappErr, Tnl, Tnil, Tend} Token;$/;"	e	enum:__anon3
+Tend	parse.h	/^	      Tapp, TpipeErr, ToutErr, TappErr, Tnl, Tnil, Tend} Token;$/;"	e	enum:__anon1
+Tend	parse.h	/^	      Tapp, TpipeErr, ToutErr, TappErr, Tnl, Tnil, Tend} Token;$/;"	e	enum:__anon3
+Terror	parse.h	/^typedef enum {Terror, Tword, Tamp, Tpipe, Tsemi, Tin, Tout,$/;"	e	enum:__anon1
+Terror	parse.h	/^typedef enum {Terror, Tword, Tamp, Tpipe, Tsemi, Tin, Tout,$/;"	e	enum:__anon3
+Tin	parse.h	/^typedef enum {Terror, Tword, Tamp, Tpipe, Tsemi, Tin, Tout,$/;"	e	enum:__anon1
+Tin	parse.h	/^typedef enum {Terror, Tword, Tamp, Tpipe, Tsemi, Tin, Tout,$/;"	e	enum:__anon3
+Tnil	parse.h	/^	      Tapp, TpipeErr, ToutErr, TappErr, Tnl, Tnil, Tend} Token;$/;"	e	enum:__anon1
+Tnil	parse.h	/^	      Tapp, TpipeErr, ToutErr, TappErr, Tnl, Tnil, Tend} Token;$/;"	e	enum:__anon3
+Tnl	parse.h	/^	      Tapp, TpipeErr, ToutErr, TappErr, Tnl, Tnil, Tend} Token;$/;"	e	enum:__anon1
+Tnl	parse.h	/^	      Tapp, TpipeErr, ToutErr, TappErr, Tnl, Tnil, Tend} Token;$/;"	e	enum:__anon3
+Token	parse.h	/^	      Tapp, TpipeErr, ToutErr, TappErr, Tnl, Tnil, Tend} Token;$/;"	t	typeref:enum:__anon1
+Token	parse.h	/^	      Tapp, TpipeErr, ToutErr, TappErr, Tnl, Tnil, Tend} Token;$/;"	t	typeref:enum:__anon3
+Tout	parse.h	/^typedef enum {Terror, Tword, Tamp, Tpipe, Tsemi, Tin, Tout,$/;"	e	enum:__anon1
+Tout	parse.h	/^typedef enum {Terror, Tword, Tamp, Tpipe, Tsemi, Tin, Tout,$/;"	e	enum:__anon3
+ToutErr	parse.h	/^	      Tapp, TpipeErr, ToutErr, TappErr, Tnl, Tnil, Tend} Token;$/;"	e	enum:__anon1
+ToutErr	parse.h	/^	      Tapp, TpipeErr, ToutErr, TappErr, Tnl, Tnil, Tend} Token;$/;"	e	enum:__anon3
+Tpipe	parse.h	/^typedef enum {Terror, Tword, Tamp, Tpipe, Tsemi, Tin, Tout,$/;"	e	enum:__anon1
+Tpipe	parse.h	/^typedef enum {Terror, Tword, Tamp, Tpipe, Tsemi, Tin, Tout,$/;"	e	enum:__anon3
+TpipeErr	parse.h	/^	      Tapp, TpipeErr, ToutErr, TappErr, Tnl, Tnil, Tend} Token;$/;"	e	enum:__anon1
+TpipeErr	parse.h	/^	      Tapp, TpipeErr, ToutErr, TappErr, Tnl, Tnil, Tend} Token;$/;"	e	enum:__anon3
+Tsemi	parse.h	/^typedef enum {Terror, Tword, Tamp, Tpipe, Tsemi, Tin, Tout,$/;"	e	enum:__anon1
+Tsemi	parse.h	/^typedef enum {Terror, Tword, Tamp, Tpipe, Tsemi, Tin, Tout,$/;"	e	enum:__anon3
+Tword	parse.h	/^typedef enum {Terror, Tword, Tamp, Tpipe, Tsemi, Tin, Tout,$/;"	e	enum:__anon1
+Tword	parse.h	/^typedef enum {Terror, Tword, Tamp, Tpipe, Tsemi, Tin, Tout,$/;"	e	enum:__anon3
+Word	parse.c	/^static char Word[BUF_SIZE+1];	\/\/ this value is valid when LookAhead == Tword$/;"	v	file:
+_empty	parse.c	/^char *_empty="empty";$/;"	v
+_endd	parse.c	/^char *_endd="end";$/;"	v
+args	parse.h	/^  char **args;			\/* argv array -- suitable for execv(1) *\/$/;"	m	struct:cmd_t
+ckmalloc	parse.c	/^void *ckmalloc(unsigned l)$/;"	f
+cmd_t	parse.h	/^struct cmd_t {$/;"	s
+exec	parse.h	/^  Token exec;			\/* whether background or foreground *\/$/;"	m	struct:cmd_t
+freeCmd	parse.c	/^static void freeCmd(Cmd c)$/;"	f	file:
+freePipe	parse.c	/^void freePipe(Pipe p)$/;"	f
+head	parse.h	/^  Cmd head;$/;"	m	struct:pipe_t
+in	parse.h	/^  Token in, out;		\/* determines where input\/output comes\/goes*\/$/;"	m	struct:cmd_t
+infile	parse.h	/^  char *infile, *outfile;	\/* set if file redirection *\/$/;"	m	struct:cmd_t
+main	main.c	/^int main(int argc, char *argv[])$/;"	f
+maxargs	parse.h	/^  int nargs, maxargs;		\/* num args in args array below (and size) *\/$/;"	m	struct:cmd_t
+mkCmd	parse.c	/^static Cmd mkCmd(Token inpipe)$/;"	f	file:
+mkPipe	parse.c	/^static Pipe mkPipe()$/;"	f	file:
+mkWord	parse.c	/^static char *mkWord(char *s)$/;"	f	file:
+nargs	parse.h	/^  int nargs, maxargs;		\/* num args in args array below (and size) *\/$/;"	m	struct:cmd_t
+newCmd	parse.c	/^static Cmd newCmd(char *cmd)$/;"	f	file:
+next	parse.h	/^  struct cmd_t *next;$/;"	m	struct:cmd_t	typeref:struct:cmd_t::cmd_t
+next	parse.h	/^  struct pipe_t *next;$/;"	m	struct:pipe_t	typeref:struct:pipe_t::pipe_t
+nextToken	parse.c	/^static Token nextToken()$/;"	f	file:
+out	parse.h	/^  Token in, out;		\/* determines where input\/output comes\/goes*\/$/;"	m	struct:cmd_t
+outfile	parse.h	/^  char *infile, *outfile;	\/* set if file redirection *\/$/;"	m	struct:cmd_t
+parse	parse.c	/^Pipe parse()$/;"	f
+pipe_t	parse.h	/^struct pipe_t {$/;"	s
+prCmd	main.c	/^static void prCmd(Cmd c)$/;"	f	file:
+prPipe	main.c	/^static void prPipe(Pipe p)$/;"	f	file:
+type	parse.h	/^  Ptype type;$/;"	m	struct:pipe_t
