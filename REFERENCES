@@ -1,2 +1,3 @@
 References:
 1. Learned about a very mellowed down version of a shell program from the following blogpost: http://brennan.io/2015/01/16/write-a-shell-in-c/
+2. GNU: Implementing a Shell http://www.gnu.org/software/libc/manual/html_node/Implementing-a-Shell.html
