@@ -39,8 +39,8 @@
 // static variables
 char *_empty="empty";
 char *_endd="end";
-static struct cmd_t Empty={Tnil, Tnil, Tnil,"","",1,1,&_empty,NULL};
-static struct cmd_t End={Tnil, Tnil, Tnil,"","",1,1,&_endd,NULL};
+static struct cmd_t Empty={0, Tnil, Tnil, Tnil,"","",1,1,&_empty,NULL};
+static struct cmd_t End={0, Tnil, Tnil, Tnil,"","",1,1,&_endd,NULL};
 static Token LookAhead;
 static char Word[BUF_SIZE+1];	// this value is valid when LookAhead == Tword
 

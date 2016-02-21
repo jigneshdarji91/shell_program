@@ -11,7 +11,131 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "parse.h"
+#include "debug.h"
 #include <unistd.h>
+#include <string.h>
+#include <sys/stat.h> 
+#include <fcntl.h>
+#include <sys/types.h>
+#include <sys/wait.h>
+
+static void exec_pipe(Pipe *p)
+{
+    log_inf("begin pgid: %d", (*p)->pgid);
+    Cmd     c;
+    pid_t   pid;
+    int     pipes[2];
+    int     fd_in = 0, fd_out, fd_err = 2;
+
+
+    for(c = (*p)->head; c; c = c->next)
+    {
+        if(Tin == c->in)
+            fd_in = open(c->infile, O_RDONLY);
+        if(c->next)
+        {
+            log_dbg("setting up pipe for %s", c->args[0]);
+            if(0 > pipe(pipes))
+            {
+                perror("pipe creation failed");
+                exit(1);
+            }
+            fd_out = pipes[1];
+            if(TpipeErr == c->out)
+                fd_err = pipes[1];
+        }
+        else
+        {
+            fd_out = 1;
+            fd_err = 2;
+            if(Tout == c->out)
+            {
+                log_dbg("write");
+                fd_out = open(c->outfile, O_WRONLY | O_CREAT, 0666);
+                if(fd_out < 0)
+                    log_err("could not open fd_out: %s", c->outfile);
+            }
+            if(Tapp == c->out)
+            {
+                log_dbg("append to %s", c->outfile);
+                fd_out = open(c->outfile, O_WRONLY | O_CREAT | O_APPEND, 0666);
+                if(fd_out < 0)
+                    log_err("could not open fd_out: %s", c->outfile);
+            }
+            if(ToutErr == c->out)
+            {
+                log_dbg("out+err write");
+                fd_err = open(c->outfile, O_WRONLY | O_CREAT, 0666);
+                if(fd_err < 0)
+                    log_err("could not open fd_err: %s", c->outfile);
+            }
+            if(TappErr == c->out)
+            {
+                log_dbg("out+err: append to %s", c->outfile);
+                fd_err = open(c->outfile, O_WRONLY | O_CREAT | O_APPEND, 0666);
+                if(fd_err < 0)
+                    log_err("could not open fd_err: %s", c->outfile);
+            }
+        }
+
+        pid = fork();
+        if(0 > pid)
+        {
+            log_dbg("error");
+            perror("fork failed");
+            exit(1);
+        }
+        else if(0 < pid)
+        {
+            log_dbg("parent");
+            c->pid = pid;
+            if(!(*p)->pgid)
+                (*p)->pgid = pid;
+            setpgid(pid, (*p)->pgid);
+
+            //if cmd is FG, wait
+            if(Tamp != c->exec)
+            {
+                log_dbg("child is FG");
+                int     status;
+                pid_t   cpid;
+                cpid = wait(&status);
+                log_inf("child %d exited", cpid);
+            }
+        }
+        else
+        {
+            if(fd_in != 0) //FIXME: 
+            {
+                dup2(fd_in, 0);
+                close(fd_in);
+            }
+            if(fd_out != 1) //FIXME: 
+            {
+                dup2(fd_out, 1); //FIXME: append
+                close(fd_out);
+            }
+            if(fd_err != 2)
+            {
+                dup2(fd_err, 2);
+                close(fd_err);
+            }
+
+
+            execvp(c->args[0], c->args);
+            perror("execvp");
+            exit(1);
+        }
+
+        if(fd_in != 0)
+            close(fd_in);
+        if(fd_out != 1)
+            close(fd_out);
+        if(fd_err != 2)
+            close(fd_err);
+        fd_in = pipes[0];
+    }
+}
 
 static void prCmd(Cmd c)
 {
@@ -88,6 +212,8 @@ int main(int argc, char *argv[])
         printf("%s%% ", host);
         p = parse();
         prPipe(p);
+        if ( p != NULL )
+            exec_pipe(&p);
         freePipe(p);
     }
 }
