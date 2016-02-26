@@ -19,6 +19,38 @@
 #include <sys/types.h>
 #include <sys/wait.h>
 
+static pid_t shell_pid;
+static pid_t shell_pgid;
+
+static void disable_signal()
+{
+    signal (SIGINT, SIG_IGN);
+    signal (SIGQUIT, SIG_IGN);
+    signal (SIGTSTP, SIG_IGN);
+    signal (SIGTTIN, SIG_IGN);
+    signal (SIGTTOU, SIG_IGN);
+    signal (SIGCHLD, SIG_IGN);
+}
+
+static void enable_signal()
+{
+    signal (SIGINT, SIG_DFL);
+    signal (SIGQUIT, SIG_DFL);
+    signal (SIGTSTP, SIG_DFL);
+    signal (SIGTTIN, SIG_DFL);
+    signal (SIGTTOU, SIG_DFL);
+    signal (SIGCHLD, SIG_DFL);
+}
+
+static void init_shell()
+{
+    shell_pid = getpid();
+    shell_pgid  = shell_pid;
+    setpgid(shell_pid, shell_pgid);
+    tcsetpgrp(shell_pid, shell_pgid);
+    disable_signal();
+}
+
 static void exec_pipe(Pipe *p)
 {
     log_inf("begin pgid: %d", (*p)->pgid);
@@ -89,8 +121,9 @@ static void exec_pipe(Pipe *p)
         {
             log_dbg("parent");
             c->pid = pid;
+            pid_t pgid = getppid();
             if(!(*p)->pgid)
-                (*p)->pgid = pid;
+                (*p)->pgid = pgid;
             setpgid(pid, (*p)->pgid);
 
             //if cmd is FG, wait
@@ -99,20 +132,33 @@ static void exec_pipe(Pipe *p)
                 log_dbg("child is FG");
                 int     status;
                 pid_t   cpid;
-                cpid = wait(&status);
-                log_inf("child %d exited", cpid);
+                waitpid(pid, &status, 0);
+                if(0 != status)
+                {
+                    log_inf("process terminated abnormally");
+                }
             }
         }
         else
         {
-            if(fd_in != 0) //FIXME: 
+            log_dbg("parent");
+            pid_t cpid = getpid();
+            pid_t ppid = getppid();
+            setpgid(cpid, ppid);
+            if(Tamp != c->exec)
+            {
+                tcsetpgrp(shell_pid, shell_pgid);
+            }
+            enable_signal();
+
+            if(fd_in != 0) 
             {
                 dup2(fd_in, 0);
                 close(fd_in);
             }
-            if(fd_out != 1) //FIXME: 
+            if(fd_out != 1) 
             {
-                dup2(fd_out, 1); //FIXME: append
+                dup2(fd_out, 1);
                 close(fd_out);
             }
             if(fd_err != 2)
@@ -120,7 +166,6 @@ static void exec_pipe(Pipe *p)
                 dup2(fd_err, 2);
                 close(fd_err);
             }
-
 
             execvp(c->args[0], c->args);
             perror("execvp");
@@ -207,6 +252,12 @@ int main(int argc, char *argv[])
     host[127] = '\0';
     getlogin_r(host, 127);
 
+    init_shell();
+    /*
+    char line[BUFSIZ];
+    while(fgets(line,BUFSIZ,stdin) != NULL){
+    }
+     */
 
     while ( 1 ) {
         printf("%s%% ", host);
