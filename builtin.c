@@ -19,6 +19,7 @@
 #include "builtin.h"
 #include "debug.h"
 #include <string.h>
+#include <unistd.h>
 #include <stdlib.h>
 
 int is_builtin(char* cmd)
@@ -42,35 +43,35 @@ int exec_builtin(Cmd* c)
     log_dbg("begin cmd: %s", (*c)->args[0]);
     if(!strcmp((*c)->args[0], "logout"))
     {
-        builtin_logout(c);
+        return builtin_logout(c);
     }
     if(!strcmp((*c)->args[0], "cd"))
     {
-        builtin_cd(c);
+        return builtin_cd(c);
     }
     if(!strcmp((*c)->args[0], "echo"))
     {
-        builtin_echo(c);
+        return builtin_echo(c);
     }
     if(!strcmp((*c)->args[0], "nice"))
     {
-        builtin_nice(c);
+        return builtin_nice(c);
     }
     if(!strcmp((*c)->args[0], "pwd"))
     {
-        builtin_pwd(c);
+        return builtin_pwd(c);
     }
     if(!strcmp((*c)->args[0], "setenv"))
     {
-        builtin_setenv(c);
+        return builtin_setenv(c);
     }
     if(!strcmp((*c)->args[0], "unsetenv"))
     {
-        builtin_unsetenv(c);
+        return builtin_unsetenv(c);
     }
     if(!strcmp((*c)->args[0], "where"))
     {
-        builtin_where(c);
+        return builtin_where(c);
     }
 
 }
@@ -83,11 +84,21 @@ int builtin_logout(Cmd* c)
 
 int builtin_cd(Cmd* c)
 {
-
+    int retVal = chdir((*c)->args[1]);
+    char cwd[1024];
+    getcwd(cwd, 1024);
+    log_inf("CWD: %s", cwd);
+    return retVal; //FIXME: validations and error messages
 }
 int builtin_echo(Cmd* c)
 {
-
+    int i;
+    for(i = 1; i < (*c)->nargs; i++)
+    {
+        fprintf(stdout, "%s ", (*c)->args[i]);
+    }
+    fprintf(stdout, "\n");
+    return 1; //FIXME: validations
 }
 int builtin_nice(Cmd* c)
 {
@@ -95,15 +106,21 @@ int builtin_nice(Cmd* c)
 }
 int builtin_pwd(Cmd* c)
 {
-
+    char cwd[1024];
+    getcwd(cwd, 1024);
+    log_inf("CWD: %s", cwd);
+    printf("%s\n", cwd);
+    return 1; //FIXME: validations and error messages
 }
 int builtin_setenv(Cmd* c)
 {
-
+    log_dbg();
+    return setenv((*c)->args[1], (*c)->args[2], 1); //FIXME: validations
 }
 int builtin_unsetenv(Cmd* c)
 {
-
+    log_dbg();
+    return unsetenv((*c)->args[1]); //FIXME: validations
 }
 int builtin_where(Cmd* c)
 {

@@ -36,6 +36,9 @@ typedef enum {
  */
 struct cmd_t {
     pid_t       pid;
+    int         fd_in;
+    int         fd_out;
+    int         fd_err;
     Token       exec;			    /* whether background or foreground */
     Token       in, out;		    /* determines where input/output comes/goes*/
     char        *infile, *outfile;  /* set if file redirection */

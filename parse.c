@@ -40,8 +40,8 @@
 // static variables
 char *_empty="empty";
 char *_endd="end";
-static struct cmd_t Empty={0, Tnil, Tnil, Tnil,"","",1,1,&_empty,NULL};
-static struct cmd_t End={0, Tnil, Tnil, Tnil,"","",1,1,&_endd,NULL};
+static struct cmd_t Empty={0, 0, 1, 2, Tnil, Tnil, Tnil,"","",1,1,&_empty,NULL};
+static struct cmd_t End={0, 0, 1, 2, Tnil, Tnil, Tnil,"","",1,1,&_endd,NULL};
 static Token LookAhead;
 static char Word[BUF_SIZE+1];	// this value is valid when LookAhead == Tword
 
@@ -98,6 +98,10 @@ static Cmd mkCmd(Token inpipe)
     c = newCmd(Word);
     Next();
     c->in = inpipe;
+    c->pid = 0;
+    c->fd_in    = 0;
+    c->fd_out   = 1;
+    c->fd_err   = 2;
 
     while ( InCmd(LA) ) {		// loop until next command
         switch ( LA ) {
@@ -221,6 +225,7 @@ static Pipe mkPipe()
     p = ckmalloc(sizeof(*p));
     p->type = Pout;	// set type to Pout until we know differently
     p->head = c;
+    p->pgid = 0;
 
     while ( PipeToken(LA) ) {
         if ( LA == TpipeErr )

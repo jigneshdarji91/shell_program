@@ -73,12 +73,16 @@ void exec_pipe(Pipe *p)
     for(c = (*p)->head; c; c = c->next)
     {
         setup_pipes(&c, pipes, &fd_in, &fd_out, &fd_err);
+        log_inf("fd_in: %d fd_out:%d fd_err: %d", fd_in, fd_out, fd_err);
         if(is_builtin(c->args[0]) && c->next == NULL)
         {
             //builtin to be executed in the shell
-            exec_builtin(&c);
+            //if it's last in the pipeline(or alone)
+            int retVal = exec_builtin(&c);
+            log_inf("cmd: %s retVal: %d", c->args[0], retVal);
             continue;
         }
+
         pid = fork();
         if(pid > 0)
         {
@@ -94,15 +98,15 @@ void exec_pipe(Pipe *p)
             if(Tamp != c->exec)
             {
                 log_dbg("child is FG");
-                int     status;
+                int     status = 0;
                 pid_t   cpid;
                 waitpid(pid, &status, 0);
                 if(0 != status)
                 {
-                    log_err("process terminated abnormally");
+                    log_err("process terminated abnormally status: %d", status);
                 }
-                tcsetpgrp(shell_pid, shell_pgid);
             }
+            tcsetpgrp(shell_pid, shell_pgid);
         }
         else if(pid == 0)
         {
@@ -113,11 +117,11 @@ void exec_pipe(Pipe *p)
             setpgid(cpid, ppid);
             if(Tamp != c->exec)
             {
-                tcsetpgrp(shell_pid, shell_pgid);
+                tcsetpgrp(cpid, (*p)->pgid);
             }
             else
             {
-                tcsetpgrp(cpid, (*p)->pgid);
+                tcsetpgrp(shell_pid, shell_pgid);
             }
 
             if(fd_in != 0) 
@@ -135,13 +139,14 @@ void exec_pipe(Pipe *p)
                 dup2(fd_err, 2);
                 close(fd_err);
             }
-
             if(is_builtin(c->args[0]))
             {
                 exec_builtin(&c);
+                exit(0);
             }
             else 
             {
+                log_inf("not a builtin");
                 execvp(c->args[0], c->args);
                 perror("execvp");
                 exit(1);
@@ -164,7 +169,7 @@ void exec_pipe(Pipe *p)
     }
 }
 
-void setup_pipes(Cmd* c,int* pipes, int* fd_in, int* fd_out, int* fd_err)
+void setup_pipes(Cmd* c, int* pipes, int* fd_in, int* fd_out, int* fd_err)
 {
     if(Tin == (*c)->in)
         *fd_in = open((*c)->infile, O_RDONLY);
@@ -213,5 +218,6 @@ void setup_pipes(Cmd* c,int* pipes, int* fd_in, int* fd_out, int* fd_err)
                 log_err("could not open fd_err: %s", (*c)->outfile);
         }
     }
+    log_inf("end fd_in: %d fd_out:%d fd_err: %d", *fd_in, *fd_out, *fd_err);
 }
 
