@@ -71,7 +71,7 @@ void exec_pipe(Pipe *p)
 
     for(c = (*p)->head; c; c = c->next)
     {
-        setup_pipes(&c, &pipes, &fd_in, &fd_out, &fd_err);
+        setup_pipes(&c, pipes, &fd_in, &fd_out, &fd_err);
         pid = fork();
         if(0 > pid)
         {
