@@ -125,6 +125,7 @@ static void exec_pipe(Pipe *p)
             if(!(*p)->pgid)
                 (*p)->pgid = pgid;
             setpgid(pid, (*p)->pgid);
+            tcsetpgrp(shell_pid, shell_pgid);
 
             //if cmd is FG, wait
             if(Tamp != c->exec)
@@ -135,21 +136,26 @@ static void exec_pipe(Pipe *p)
                 waitpid(pid, &status, 0);
                 if(0 != status)
                 {
-                    log_inf("process terminated abnormally");
+                    log_err("process terminated abnormally");
                 }
+                tcsetpgrp(shell_pid, shell_pgid);
             }
         }
         else
         {
-            log_dbg("parent");
+            log_dbg("child");
             pid_t cpid = getpid();
             pid_t ppid = getppid();
+            enable_signal();
             setpgid(cpid, ppid);
             if(Tamp != c->exec)
             {
                 tcsetpgrp(shell_pid, shell_pgid);
             }
-            enable_signal();
+            else
+            {
+                tcsetpgrp(cpid, (*p)->pgid);
+            }
 
             if(fd_in != 0) 
             {
