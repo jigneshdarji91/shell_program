@@ -215,8 +215,3 @@ void setup_pipes(Cmd* c,int* pipes, int* fd_in, int* fd_out, int* fd_err)
     }
 }
 
-void exec_builtin(Cmd* c)
-{
-    log_dbg("begin cmd: %s", (*c)->args[0]);
-
-}

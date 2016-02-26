@@ -24,5 +24,4 @@ void disable_signal();
 void enable_signal();
 void init_shell();
 void exec_pipe(Pipe *p);
-void exec_builtin(Cmd *p);
 void setup_pipes(Cmd*, int*, int*, int*, int*);

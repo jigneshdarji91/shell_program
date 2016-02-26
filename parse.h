@@ -11,6 +11,8 @@
 #ifndef PARSE_H
 #define PARSE_H
 
+#include <sys/types.h> 
+
 /* list of all tokens */
 typedef enum {
     Terror, 
