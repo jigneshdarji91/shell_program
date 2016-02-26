@@ -34,4 +34,7 @@
 *.log
 
 #ctags
-*tags
+tags
+
+#swap
+*.swp

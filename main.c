@@ -95,7 +95,7 @@ int main(int argc, char *argv[])
     while ( 1 ) {
         printf("%s%% ", host);
         p = parse();
-        prPipe(p);
+        //prPipe(p);
         Pipe p_exec = p;
         while(p_exec != NULL)
         {

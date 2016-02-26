@@ -67,20 +67,65 @@ void exec_pipe(Pipe *p)
     Cmd     c;
     pid_t   pid;
     int     pipes[2];
-    int     fd_in = 0, fd_out, fd_err = 2;
+    int     fd_in = 0, fd_out = 1, fd_err = 2;
+    int     old_fd_in = dup(0);
+    int     old_fd_out = dup(1);
+    int     old_fd_err = dup(2);
 
 
     for(c = (*p)->head; c; c = c->next)
     {
         setup_pipes(&c, pipes, &fd_in, &fd_out, &fd_err);
-        log_inf("fd_in: %d fd_out:%d fd_err: %d", fd_in, fd_out, fd_err);
         if(is_builtin(c->args[0]) && c->next == NULL)
         {
             //builtin to be executed in the shell
             //if it's last in the pipeline(or alone)
+            if(fd_in != 0) 
+            {
+                fflush(stdin);
+                dup2(fd_in, 0);
+                close(fd_in);
+            }
+            if(fd_out != 1) 
+            {
+                fflush(stdout);
+                dup2(fd_out, 1);
+                close(fd_out);
+            }
+            if(fd_err != 2)
+            {
+                fflush(stderr);
+                dup2(fd_err, 2);
+                close(fd_err);
+            }
+
             int retVal = exec_builtin(&c);
             log_inf("cmd: %s retVal: %d", c->args[0], retVal);
-            continue;
+
+            if(fd_in != 0)
+            {
+                fflush(stdin);
+                close(fd_in);
+                dup2(old_fd_in, 0);
+                close(old_fd_in);
+            }
+            if(fd_out != 1)
+            {
+                fflush(stdout);
+                close(fd_out);
+                dup2(old_fd_out, 1);
+                close(old_fd_out);
+            }
+            if(fd_err != 2)
+            {
+                fflush(stderr);
+                close(fd_err);
+                dup2(old_fd_err, 2);
+                close(old_fd_err);
+            }
+            //fd_in = pipes[0];
+            log_inf("fd_in: %d fd_out:%d fd_err: %d", fd_in, fd_out, fd_err);
+            break;
         }
 
         pid = fork();
@@ -117,7 +162,7 @@ void exec_pipe(Pipe *p)
             setpgid(cpid, ppid);
             if(Tamp != c->exec)
             {
-                tcsetpgrp(cpid, (*p)->pgid);
+                tcsetpgrp(cpid, ppid);
             }
             else
             {
@@ -167,6 +212,7 @@ void exec_pipe(Pipe *p)
             close(fd_err);
         fd_in = pipes[0];
     }
+    log_inf("end");
 }
 
 void setup_pipes(Cmd* c, int* pipes, int* fd_in, int* fd_out, int* fd_err)
@@ -192,7 +238,7 @@ void setup_pipes(Cmd* c, int* pipes, int* fd_in, int* fd_out, int* fd_err)
         if(Tout == (*c)->out)
         {
             log_dbg("write");
-            *fd_out = open((*c)->outfile, O_WRONLY | O_CREAT, 0666);
+            *fd_out = open((*c)->outfile, O_WRONLY | O_CREAT | O_TRUNC, 0666);
             if(*fd_out < 0)
                 log_err("could not open fd_out: %s", (*c)->outfile);
         }
@@ -206,7 +252,7 @@ void setup_pipes(Cmd* c, int* pipes, int* fd_in, int* fd_out, int* fd_err)
         if(ToutErr == (*c)->out)
         {
             log_dbg("out+err write");
-            *fd_err = open((*c)->outfile, O_WRONLY | O_CREAT, 0666);
+            *fd_err = open((*c)->outfile, O_WRONLY | O_CREAT | O_TRUNC, 0666);
             if(*fd_err < 0)
                 log_err("could not open fd_err: %s", (*c)->outfile);
         }

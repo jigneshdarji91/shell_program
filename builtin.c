@@ -90,6 +90,7 @@ int builtin_cd(Cmd* c)
     log_dbg("CWD: %s", cwd);
     return retVal; //FIXME: validations and error messages
 }
+
 int builtin_echo(Cmd* c)
 {
     int i;
@@ -101,10 +102,12 @@ int builtin_echo(Cmd* c)
     fprintf(stdout, "\n");
     return 1; //FIXME: validations
 }
+
 int builtin_nice(Cmd* c)
 {
 
 }
+
 int builtin_pwd(Cmd* c)
 {
     char cwd[1024];
@@ -113,6 +116,7 @@ int builtin_pwd(Cmd* c)
     printf("%s\n", cwd);
     return 1; //FIXME: validations and error messages
 }
+
 int builtin_setenv(Cmd* c)
 {
     log_dbg();
@@ -122,11 +126,13 @@ int builtin_setenv(Cmd* c)
     else
         return setenv((*c)->args[1], (char *)" ", 1); //FIXME: set the string to blank
 }
+
 int builtin_unsetenv(Cmd* c)
 {
     log_dbg();
     return unsetenv((*c)->args[1]); //FIXME: validations
 }
+
 int builtin_where(Cmd* c)
 {
 
