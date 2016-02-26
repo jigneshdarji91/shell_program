@@ -71,54 +71,7 @@ void exec_pipe(Pipe *p)
 
     for(c = (*p)->head; c; c = c->next)
     {
-        if(Tin == c->in)
-            fd_in = open(c->infile, O_RDONLY);
-        if(c->next)
-        {
-            log_dbg("setting up pipe for %s", c->args[0]);
-            if(0 > pipe(pipes))
-            {
-                perror("pipe creation failed");
-                exit(1);
-            }
-            fd_out = pipes[1];
-            if(TpipeErr == c->out)
-                fd_err = pipes[1];
-        }
-        else
-        {
-            fd_out = 1;
-            fd_err = 2;
-            if(Tout == c->out)
-            {
-                log_dbg("write");
-                fd_out = open(c->outfile, O_WRONLY | O_CREAT, 0666);
-                if(fd_out < 0)
-                    log_err("could not open fd_out: %s", c->outfile);
-            }
-            if(Tapp == c->out)
-            {
-                log_dbg("append to %s", c->outfile);
-                fd_out = open(c->outfile, O_WRONLY | O_CREAT | O_APPEND, 0666);
-                if(fd_out < 0)
-                    log_err("could not open fd_out: %s", c->outfile);
-            }
-            if(ToutErr == c->out)
-            {
-                log_dbg("out+err write");
-                fd_err = open(c->outfile, O_WRONLY | O_CREAT, 0666);
-                if(fd_err < 0)
-                    log_err("could not open fd_err: %s", c->outfile);
-            }
-            if(TappErr == c->out)
-            {
-                log_dbg("out+err: append to %s", c->outfile);
-                fd_err = open(c->outfile, O_WRONLY | O_CREAT | O_APPEND, 0666);
-                if(fd_err < 0)
-                    log_err("could not open fd_err: %s", c->outfile);
-            }
-        }
-
+        setup_pipes(&c, &pipes, &fd_in, &fd_out, &fd_err);
         pid = fork();
         if(0 > pid)
         {
@@ -196,3 +149,55 @@ void exec_pipe(Pipe *p)
         fd_in = pipes[0];
     }
 }
+
+void setup_pipes(Cmd* c,int* pipes, int* fd_in, int* fd_out, int* fd_err)
+{
+    if(Tin == (*c)->in)
+        *fd_in = open((*c)->infile, O_RDONLY);
+    if((*c)->next)
+    {
+        log_dbg("setting up pipe for %s", (*c)->args[0]);
+        if(0 > pipe(pipes))
+        {
+            perror("pipe creation failed");
+            exit(1);
+        }
+        *fd_out = pipes[1];
+        if(TpipeErr == (*c)->out)
+            *fd_err = pipes[1];
+    }
+    else
+    {
+        *fd_out = 1;
+        *fd_err = 2;
+        if(Tout == (*c)->out)
+        {
+            log_dbg("write");
+            *fd_out = open((*c)->outfile, O_WRONLY | O_CREAT, 0666);
+            if(*fd_out < 0)
+                log_err("could not open fd_out: %s", (*c)->outfile);
+        }
+        if(Tapp == (*c)->out)
+        {
+            log_dbg("append to %s", (*c)->outfile);
+            *fd_out = open((*c)->outfile, O_WRONLY | O_CREAT | O_APPEND, 0666);
+            if(*fd_out < 0)
+                log_err("could not open fd_out: %s", (*c)->outfile);
+        }
+        if(ToutErr == (*c)->out)
+        {
+            log_dbg("out+err write");
+            *fd_err = open((*c)->outfile, O_WRONLY | O_CREAT, 0666);
+            if(*fd_err < 0)
+                log_err("could not open fd_err: %s", (*c)->outfile);
+        }
+        if(TappErr == (*c)->out)
+        {
+            log_dbg("out+err: append to %s", (*c)->outfile);
+            *fd_err = open((*c)->outfile, O_WRONLY | O_CREAT | O_APPEND, 0666);
+            if(*fd_err < 0)
+                log_err("could not open fd_err: %s", (*c)->outfile);
+        }
+    }
+}
+
