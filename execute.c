@@ -27,6 +27,7 @@
 #include <sys/types.h>
 #include <sys/wait.h>
 #include "execute.h"
+#include "builtin.h"
 
 static pid_t shell_pid = 0;
 static pid_t shell_pgid = 0;
@@ -72,14 +73,14 @@ void exec_pipe(Pipe *p)
     for(c = (*p)->head; c; c = c->next)
     {
         setup_pipes(&c, pipes, &fd_in, &fd_out, &fd_err);
-        pid = fork();
-        if(0 > pid)
+        if(is_builtin(c->args[0]) && c->next == NULL)
         {
-            log_dbg("error");
-            perror("fork failed");
-            exit(1);
+            //builtin to be executed in the shell
+            exec_builtin(&c);
+            continue;
         }
-        else if(0 < pid)
+        pid = fork();
+        if(pid > 0)
         {
             log_dbg("parent");
             c->pid = pid;
@@ -103,7 +104,7 @@ void exec_pipe(Pipe *p)
                 tcsetpgrp(shell_pid, shell_pgid);
             }
         }
-        else
+        else if(pid == 0)
         {
             log_dbg("child");
             pid_t cpid = getpid();
@@ -135,8 +136,21 @@ void exec_pipe(Pipe *p)
                 close(fd_err);
             }
 
-            execvp(c->args[0], c->args);
-            perror("execvp");
+            if(is_builtin(c->args[0]))
+            {
+                exec_builtin(&c);
+            }
+            else 
+            {
+                execvp(c->args[0], c->args);
+                perror("execvp");
+                exit(1);
+            }
+        }
+        else
+        {
+            log_dbg("error");
+            perror("fork failed");
             exit(1);
         }
 
@@ -201,3 +215,8 @@ void setup_pipes(Cmd* c,int* pipes, int* fd_in, int* fd_out, int* fd_err)
     }
 }
 
+void exec_builtin(Cmd* c)
+{
+    log_dbg("begin cmd: %s", (*c)->args[0]);
+
+}

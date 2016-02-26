@@ -1,12 +1,12 @@
 /*
  * =====================================================================================
  *
- *       Filename:  execute.h
+ *       Filename:  builtin.h
  *
- *    Description:  execute pipes
+ *    Description:  builtin functions for the shell
  *
  *        Version:  1.0
- *        Created:  02/25/2016 09:02:53 PM
+ *        Created:  02/25/2016 09:43:55 PM
  *       Revision:  none
  *       Compiler:  gcc
  *
@@ -15,14 +15,6 @@
  *
  * =====================================================================================
  */
-#include "parse.h"
 
-static pid_t shell_pid;
-static pid_t shell_pgid;
 
-void disable_signal();
-void enable_signal();
-void init_shell();
-void exec_pipe(Pipe *p);
-void exec_builtin(Cmd *p);
-void setup_pipes(Cmd*, int*, int*, int*, int*);
+int is_builtin(char* cmd);
