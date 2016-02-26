@@ -259,18 +259,17 @@ int main(int argc, char *argv[])
     getlogin_r(host, 127);
 
     init_shell();
-    /*
-    char line[BUFSIZ];
-    while(fgets(line,BUFSIZ,stdin) != NULL){
-    }
-     */
 
     while ( 1 ) {
         printf("%s%% ", host);
         p = parse();
         prPipe(p);
-        if ( p != NULL )
-            exec_pipe(&p);
+        Pipe p_exec = p;
+        while(p_exec != NULL)
+        {
+            exec_pipe(&p_exec);
+            p_exec = p_exec->next;
+        }
         freePipe(p);
     }
 }
