@@ -23,6 +23,8 @@
 
 void poll_pipe_status(Pipe *p);
 int update_pipe_status(Pipe *p, pid_t pid, int status);
+pid_t run_stopped();
+void continue_pgrp(pid_t);
 
 
 #endif /* __JOB_CONTROL__ */

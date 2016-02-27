@@ -28,3 +28,6 @@ int builtin_pwd(Cmd* c);
 int builtin_setenv(Cmd* c);
 int builtin_unsetenv(Cmd* c);
 int builtin_where(Cmd* c);
+int builtin_kill(Cmd* c);
+int builtin_fg(Cmd* c);
+int builtin_bg(Cmd* c);

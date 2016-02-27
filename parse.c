@@ -213,7 +213,6 @@ static Cmd mkCmd(Token inpipe)
 
 static Pipe mkPipe()
 {
-    log_dbg(" begin");
     Pipe p;
     Cmd c;
 
@@ -263,7 +262,6 @@ static Pipe mkPipe()
         if ( !p->next )
             break;
     }
-    log_dbg(" begin");
     return p;
 } /*---------- End of mkPipe ------------------------------------------------*/
 
@@ -282,12 +280,10 @@ static Pipe mkPipe()
 
 Pipe parse()
 {
-    log_dbg(" begin");
     Pipe p;
 
     Next();		// prime lookahead
     p = mkPipe();
-    log_dbg(" end");
     return p;
 } /*---------- End of parse -------------------------------------------------*/
 

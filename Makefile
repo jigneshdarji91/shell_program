@@ -5,8 +5,8 @@
 
 CC=gcc
 CFLAGS=-g
-SRC=main.c parse.c parse.h execute.c execute.h builtin.c builtin.h
-OBJ=main.o parse.o builtin.o execute.o 
+SRC=main.c parse.c parse.h execute.c execute.h builtin.c builtin.h job_control.c job_control.h
+OBJ=main.o parse.o builtin.o execute.o job_control.o 
 
 ush:	$(OBJ)
 	$(CC) -o $@ $(OBJ)

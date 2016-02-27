@@ -31,7 +31,11 @@ int is_builtin(char* cmd)
         && strcmp(cmd, "pwd")
         && strcmp(cmd, "setenv")
         && strcmp(cmd, "unsetenv")
-        && strcmp(cmd, "where")))
+        && strcmp(cmd, "where")
+        && strcmp(cmd, "kill")
+        && strcmp(cmd, "bg")
+        && strcmp(cmd, "fg")
+        ))
     {
         return 1;
     }
@@ -72,6 +76,18 @@ int exec_builtin(Cmd* c)
     if(!strcmp((*c)->args[0], "where"))
     {
         return builtin_where(c);
+    }
+    if(!strcmp((*c)->args[0], "kill"))
+    {
+        return builtin_kill(c);
+    }
+    if(!strcmp((*c)->args[0], "fg"))
+    {
+        return builtin_fg(c);
+    }
+    if(!strcmp((*c)->args[0], "bg"))
+    {
+        return builtin_bg(c);
     }
 
 }
@@ -141,3 +157,36 @@ int builtin_where(Cmd* c)
         printf("%s is a shell built-in\n", (*c)->args[1]);
     }
 }
+
+int builtin_kill(Cmd* c)
+{
+
+}
+
+int builtin_fg(Cmd* c)
+{
+    //steps:
+    //1. find child who's in stopped state
+    //2. send continue
+    //3. wait
+
+    log_dbg();
+    pid_t   pid     = run_stopped();
+    if(pid > 0)
+    {
+        int     status = 0;
+        pid_t   pgid    = getpgid(pid);
+        tcsetpgrp(pid, pgid);
+        waitpid(pid, &status, WUNTRACED);
+        if(0 != status)
+        {
+            log_err("process terminated abnormally status: %d", status);
+        }
+    }
+}
+
+int builtin_bg(Cmd* c)
+{
+
+}
+

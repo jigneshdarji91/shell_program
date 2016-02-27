@@ -23,8 +23,8 @@
 
 void poll_pipe_status(Pipe *p)
 {
-    int status      =   0;
-    pid_t   cmd_pid  =   0;
+    int     status      =   0;
+    pid_t   cmd_pid     =   0;
 
     do {
         cmd_pid = waitpid(WAIT_ANY, &status, WUNTRACED | WNOHANG);
@@ -58,3 +58,28 @@ int update_pipe_status(Pipe *first_pipe, pid_t pid, int status)
     }
 }
 
+pid_t run_stopped()
+{
+    int     status  =   0;
+    pid_t   pid     =   0;
+    pid_t   pgid    = 0;
+    do {
+        pid = waitpid(WAIT_ANY, &status, WUNTRACED | WNOHANG);
+        log_inf("starting pid: %d", pid);
+        if(pid > 0 
+                && !WIFSTOPPED(status))
+        {
+            pgid = getpgid(pid);
+            continue_pgrp(pid);
+            break;
+        }
+    } while(pid > 0);
+    return pgid;
+}
+
+void continue_pgrp(pid_t pgid)
+{
+    log_dbg();
+    if (kill (- pgid, SIGCONT) < 0)
+        perror ("kill (SIGCONT)");
+}

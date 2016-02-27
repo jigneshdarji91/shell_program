@@ -156,15 +156,17 @@ void exec_pipe(Pipe *p)
         {
             log_dbg("child");
             pid_t cpid = getpid();
+            pid_t ppid = getppid();
             enable_signal();
-            setpgid(cpid, (*p)->pgid);
+            setpgid(cpid, ppid);
             if(Tamp != c->exec)
             {
-                tcsetpgrp(cpid, (*p)->pgid);
+                //tcsetpgrp(cpid, (*p)->pgid);
+                //tcsetpgrp(cpid, shell_pgid);
             }
             else
             {
-                tcsetpgrp(shell_pid, shell_pgid);
+                //tcsetpgrp(shell_pid, shell_pgid);
             }
 
             if(fd_in != 0) 

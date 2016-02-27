@@ -1,0 +1,103 @@
+diff --git a/execute.c b/execute.c
+index 6d2f760..614adb9 100644
+--- a/execute.c
++++ b/execute.c
+@@ -29,8 +29,9 @@
+ #include "execute.h"
+ #include "builtin.h"
+ 
+-static pid_t shell_pid = 0;
+-static pid_t shell_pgid = 0;
++static pid_t    shell_pid = 0;
++static pid_t    shell_pgid = 0;
++static int      shell_stdin = 0;
+ 
+ void disable_signal()
+ {
+@@ -44,7 +45,7 @@ void disable_signal()
+ 
+ void enable_signal()
+ {
+-    signal (SIGINT, SIG_DFL);
++    signal (SIGINT,  SIG_DFL);
+     signal (SIGQUIT, SIG_DFL);
+     signal (SIGTSTP, SIG_DFL);
+     signal (SIGTTIN, SIG_DFL);
+@@ -52,12 +53,20 @@ void enable_signal()
+     signal (SIGCHLD, SIG_DFL);
+ }
+ 
++void signal_SIGINT(int signo)
++{
++    pid_t pid   =   getpid();
++    pid_t pgid  =   getpgid(pid);
++    killpg(pgid, signo);
++}
++
+ void init_shell()
+ {
+     shell_pid = getpid();
+     shell_pgid  = shell_pid;
++    shell_stdin = 0;
+     setpgid(shell_pid, shell_pgid);
+-    tcsetpgrp(shell_pid, shell_pgid);
++    tcsetpgrp(shell_stdin, shell_pgid);
+     disable_signal();
+ }
+ 
+@@ -133,7 +142,6 @@ void exec_pipe(Pipe *p)
+         {
+             log_dbg("parent");
+             c->pid = pid;
+-            pid_t pgid = getpid();
+             if(!(*p)->pgid)
+                 (*p)->pgid = pid;
+             setpgid(pid, (*p)->pgid);
+@@ -144,28 +152,29 @@ void exec_pipe(Pipe *p)
+                 log_dbg("child is FG");
+                 int     status = 0;
+                 pid_t   cpid;
++                tcsetpgrp(shell_stdin, (*p)->pgid);
+                 waitpid(pid, &status, WUNTRACED);
+                 if(0 != status)
+                 {
+                     log_err("process terminated abnormally status: %d", status);
+                 }
+             }
+-            tcsetpgrp(shell_pid, shell_pgid);
++            tcsetpgrp(shell_stdin, shell_pgid);
+         }
+         else if(pid == 0)
+         {
+             log_dbg("child");
+             pid_t cpid = getpid();
+-            enable_signal();
+-            setpgid(cpid, (*p)->pgid);
++            pid_t pgid = (*p)->pgid;
++            pid_t ppid = getppid();
++            if((*p)->pgid)
++                pgid = cpid;   
++            setpgid(cpid, ppid);
+             if(Tamp != c->exec)
+-            {
+-                tcsetpgrp(cpid, (*p)->pgid);
+-            }
++                tcsetpgrp(shell_stdin, pgid);
+             else
+-            {
+-                tcsetpgrp(shell_pid, shell_pgid);
+-            }
++                tcsetpgrp(shell_stdin, shell_pgid);
++            enable_signal();
+ 
+             if(fd_in != 0) 
+             {
+diff --git a/execute.h b/execute.h
+index ab86591..cc2530e 100644
+--- a/execute.h
++++ b/execute.h
+@@ -25,3 +25,4 @@ void enable_signal();
+ void init_shell();
+ void exec_pipe(Pipe *p);
+ void setup_pipes(Cmd*, int*, int*, int*, int*);
++void signal_SIGINT(int signo);
