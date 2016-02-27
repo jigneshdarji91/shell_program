@@ -39,6 +39,8 @@ struct cmd_t {
     int         fd_in;
     int         fd_out;
     int         fd_err;
+    int         completed;
+    int         paused;
     Token       exec;			    /* whether background or foreground */
     Token       in, out;		    /* determines where input/output comes/goes*/
     char        *infile, *outfile;  /* set if file redirection */

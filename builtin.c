@@ -135,5 +135,9 @@ int builtin_unsetenv(Cmd* c)
 
 int builtin_where(Cmd* c)
 {
-
+    if((*c)->nargs > 1
+        && is_builtin((*c)->args[1]))
+    {
+        printf("%s is a shell built-in\n", (*c)->args[1]);
+    }
 }

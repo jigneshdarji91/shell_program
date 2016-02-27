@@ -86,16 +86,17 @@ static void prPipe(Pipe p)
 int main(int argc, char *argv[])
 {
     Pipe p;
+    Pipe stack;
     char host[128];
     host[127] = '\0';
-    getlogin_r(host, 127);
+    gethostname(host, 127);
 
     init_shell();
 
     while ( 1 ) {
         printf("%s%% ", host);
         p = parse();
-        //prPipe(p);
+        prPipe(p);
         Pipe p_exec = p;
         while(p_exec != NULL)
         {
