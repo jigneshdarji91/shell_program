@@ -270,11 +270,38 @@ void exec_pipe(Pipe *p)
 
 void exec_file(char* filename)
 {
-    int f = open(filename, O_RDONLY);
-    int fd_stdin = dup(0);
+    log_dbg("begin filename: %s", filename);
+    FILE* f = fopen(filename, "r");
+    Pipe p;
+    if(f == NULL)
+    {
+        log_err("failed to open file: %s", filename);
+        return;
+    }
+    //int fd_stdin = dup(0);
+    char buff[1024];
 
-    if(f < 0)
-        log_err("could not open fd_err: %s", filename);
+    dup2(fileno(f), 0);
+    close(fileno(f));
 
+    while(1)
+    {
+        if(fgets(buff, 1024, f) == NULL)
+        {
+            close(fileno(f));
+            break;
+        }
+        /*
+        p = parse();
+        Pipe p_exec = p;
+        while(p_exec != NULL)
+        {
+            exec_pipe(&p_exec);
+            p_exec = p_exec->next;
+        }
+        freePipe(p);
+        */
+    }
+    log_dbg("end");
 }
 

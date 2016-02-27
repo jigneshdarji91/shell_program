@@ -23,5 +23,6 @@ static pid_t shell_pgid;
 void disable_signal();
 void enable_signal();
 void init_shell();
-void exec_pipe(Pipe *p);
+void exec_pipe(Pipe*);
+void exec_file(char*);
 void setup_pipes(Cmd*, int*, int*, int*, int*);

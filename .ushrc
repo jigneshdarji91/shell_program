@@ -1,0 +1,7 @@
+echo hello brother
+cat Makefile > temp.txt
+ls main.c >> temp.txt
+echo hello from the other side | grep g > temp1.txt
+echo "============" >> temp1.txt
+echo hello from the other side | grep h >> temp1.txt
+echo hello brother

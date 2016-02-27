@@ -85,9 +85,11 @@ static void prPipe(Pipe p)
 
 int main(int argc, char *argv[])
 {
-    Pipe p;
-    Pipe stack;
-    char host[128];
+    Pipe        p;
+    Pipe        stack;
+    int         first_run = 1;
+    char        host[128];
+
     host[127] = '\0';
     gethostname(host, 127);
 
@@ -95,6 +97,11 @@ int main(int argc, char *argv[])
 
     while ( 1 ) {
         printf("%s%% ", host);
+        if(first_run)
+        {
+            exec_file(".ushrc");
+            first_run = 0;
+        }
         p = parse();
         prPipe(p);
         Pipe p_exec = p;
