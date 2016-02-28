@@ -97,7 +97,7 @@ int exec_builtin(Cmd* c)
 int builtin_logout(Cmd* c)
 {
     log_dbg();
-    exit(0);  //FIXME: need for graceful exit?
+    exit(0);  
 }
 
 int builtin_cd(Cmd* c)
@@ -115,7 +115,21 @@ int builtin_echo(Cmd* c)
     for(i = 1; i < (*c)->nargs; i++)
     {
         //TODO: handle env variable
-        fprintf(stdout, "%s ", (*c)->args[i]);
+        if((*c)->args[i][0] == '$')
+        {
+            char cmd_str[1024];
+            char *env_value;
+            if(strlen((*c)->args[i]) <= 1)
+            {
+                continue;
+            }
+            strncpy(cmd_str, (*c)->args[i] + 1, strlen((*c)->args[i]) - 1);
+            env_value = getenv(cmd_str);
+            if(env_value)
+                fprintf(stdout, "%s ", env_value);
+        }
+        else
+            fprintf(stdout, "%s ", (*c)->args[i]);
     }
     fprintf(stdout, "\n");
     return 1; //FIXME: validations

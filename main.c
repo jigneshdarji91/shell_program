@@ -27,6 +27,10 @@ int main(int argc, char *argv[])
     Pipe        stack;
     int         first_run = 1;
     char        host[128];
+    char        ushrc_file[128];
+
+    sprintf(ushrc_file, "%s/.ushrc", getenv("HOME"));
+    log_dbg("file: %s", ushrc_file);
 
     host[127] = '\0';
     gethostname(host, 127);
@@ -34,21 +38,24 @@ int main(int argc, char *argv[])
     init_shell();
 
     while ( 1 ) {
-        printf("%s%% ", host);
-        if(first_run)
+        if(first_run == 1)
         {
-            exec_file(".ushrc");
+            exec_file(ushrc_file); //FIXME: exec ushrc
             first_run = 0;
         }
-        p = parse();
-        prPipe(p);
-        Pipe p_exec = p;
-        while(p_exec != NULL)
+        else
         {
-            exec_pipe(&p_exec);
-            p_exec = p_exec->next;
+            printf("%s%% ", host);
+            fflush(stdout);
+            p = parse();
+            Pipe p_exec = p;
+            while(p_exec != NULL)
+            {
+                exec_pipe(&p_exec);
+                p_exec = p_exec->next;
+            }
+            freePipe(p);
         }
-        freePipe(p);
     }
 }
 

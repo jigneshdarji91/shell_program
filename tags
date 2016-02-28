@@ -10,16 +10,17 @@ CFLAGS	Makefile	/^CFLAGS=-g$/;"	m
 Cmd	parse.h	/^typedef struct cmd_t *Cmd;$/;"	t	typeref:struct:cmd_t
 CmdToken	parse.c	35;"	d	file:
 DEBUGGING_MODE	debug.h	28;"	d
+DEFAULT_NICE	builtin.c	29;"	d	file:
 EOS	parse.c	23;"	d	file:
 ERR_MSG	parse.c	21;"	d	file:
-Empty	parse.c	/^static struct cmd_t Empty={0, 0, 1, 2, Tnil, Tnil, Tnil,"","",1,1,&_empty,NULL};$/;"	v	typeref:struct:cmd_t	file:
-End	parse.c	/^static struct cmd_t End={0, 0, 1, 2, Tnil, Tnil, Tnil,"","",1,1,&_endd,NULL};$/;"	v	typeref:struct:cmd_t	file:
+Empty	parse.c	/^static struct cmd_t Empty={0, 0, 1, 2, 0, 0, Tnil, Tnil, Tnil,"","",1,1,&_empty,NULL};$/;"	v	typeref:struct:cmd_t	file:
+End	parse.c	/^static struct cmd_t End={0, 0, 1, 2, 0, 0, Tnil, Tnil, Tnil,"","",1,1,&_endd,NULL};$/;"	v	typeref:struct:cmd_t	file:
 EndOfInput	parse.c	38;"	d	file:
 InCmd	parse.c	29;"	d	file:
 LA	parse.c	25;"	d	file:
 LookAhead	parse.c	/^static Token LookAhead;$/;"	v	file:
 Next	parse.c	24;"	d	file:
-OBJ	Makefile	/^OBJ=main.o parse.o builtin.o execute.o $/;"	m
+OBJ	Makefile	/^OBJ=main.o parse.o builtin.o execute.o job_control.o print.o$/;"	m
 PARSE_H	parse.h	12;"	d
 Pipe	parse.h	/^typedef struct pipe_t *Pipe;$/;"	t	typeref:struct:pipe_t
 PipeToken	parse.c	32;"	d	file:
@@ -30,7 +31,7 @@ PoutErr	parse.h	/^typedef enum {Pout, PoutErr} Ptype;$/;"	e	enum:__anon4
 Ptype	parse.h	/^typedef enum {Pout, PoutErr} Ptype;$/;"	t	typeref:enum:__anon2
 Ptype	parse.h	/^typedef enum {Pout, PoutErr} Ptype;$/;"	t	typeref:enum:__anon4
 ReadChar	parse.c	26;"	d	file:
-SRC	Makefile	/^SRC=main.c parse.c parse.h execute.c execute.h builtin.c builtin.h$/;"	m
+SRC	Makefile	/^SRC=main.c parse.c parse.h execute.c execute.h builtin.c builtin.h job_control.c job_control.h print.c print.h$/;"	m
 Tamp	parse.h	/^    Tamp,       \/* run in BG *\/ $/;"	e	enum:__anon1
 Tamp	parse.h	/^    Tamp,       \/* run in BG *\/ $/;"	e	enum:__anon3
 Tapp	parse.h	/^    Tapp,       \/* append output to file*\/$/;"	e	enum:__anon1
@@ -62,24 +63,31 @@ Tsemi	parse.h	/^    Tsemi, $/;"	e	enum:__anon3
 Tword	parse.h	/^    Tword, $/;"	e	enum:__anon1
 Tword	parse.h	/^    Tword, $/;"	e	enum:__anon3
 Word	parse.c	/^static char Word[BUF_SIZE+1];	\/\/ this value is valid when LookAhead == Tword$/;"	v	file:
+__JOB_CONTROL__	job_control.h	20;"	d
 __dbg_h__	debug.h	21;"	d
 _empty	parse.c	/^char *_empty="empty";$/;"	v
 _endd	parse.c	/^char *_endd="end";$/;"	v
 args	parse.h	/^    char        **args;			    \/* argv array -- suitable for execv(1) *\/$/;"	m	struct:cmd_t
+builtin_bg	builtin.c	/^int builtin_bg(Cmd* c)$/;"	f
 builtin_cd	builtin.c	/^int builtin_cd(Cmd* c)$/;"	f
 builtin_echo	builtin.c	/^int builtin_echo(Cmd* c)$/;"	f
+builtin_fg	builtin.c	/^int builtin_fg(Cmd* c)$/;"	f
+builtin_kill	builtin.c	/^int builtin_kill(Cmd* c)$/;"	f
 builtin_logout	builtin.c	/^int builtin_logout(Cmd* c)$/;"	f
-builtin_nice	builtin.c	/^int builtin_nice(Cmd* c)$/;"	f
+builtin_nice	builtin.c	/^int builtin_nice(Cmd* c, long int* niceval)$/;"	f
 builtin_pwd	builtin.c	/^int builtin_pwd(Cmd* c)$/;"	f
 builtin_setenv	builtin.c	/^int builtin_setenv(Cmd* c)$/;"	f
 builtin_unsetenv	builtin.c	/^int builtin_unsetenv(Cmd* c)$/;"	f
 builtin_where	builtin.c	/^int builtin_where(Cmd* c)$/;"	f
 ckmalloc	parse.c	/^void *ckmalloc(unsigned l)$/;"	f
 cmd_t	parse.h	/^struct cmd_t {$/;"	s
+completed	parse.h	/^    int         completed;$/;"	m	struct:cmd_t
+continue_pgrp	job_control.c	/^void continue_pgrp(pid_t pgid)$/;"	f
 disable_signal	execute.c	/^void disable_signal()$/;"	f
 enable_signal	execute.c	/^void enable_signal()$/;"	f
 exec	parse.h	/^    Token       exec;			    \/* whether background or foreground *\/$/;"	m	struct:cmd_t
 exec_builtin	builtin.c	/^int exec_builtin(Cmd* c)$/;"	f
+exec_file	execute.c	/^void exec_file(char* filename)$/;"	f
 exec_pipe	execute.c	/^void exec_pipe(Pipe *p)$/;"	f
 fd_err	parse.h	/^    int         fd_err;$/;"	m	struct:cmd_t
 fd_in	parse.h	/^    int         fd_in;$/;"	m	struct:cmd_t
@@ -108,14 +116,18 @@ nextToken	parse.c	/^static Token nextToken()$/;"	f	file:
 out	parse.h	/^    Token       in, out;		    \/* determines where input\/output comes\/goes*\/$/;"	m	struct:cmd_t
 outfile	parse.h	/^    char        *infile, *outfile;  \/* set if file redirection *\/$/;"	m	struct:cmd_t
 parse	parse.c	/^Pipe parse()$/;"	f
+paused	parse.h	/^    int         paused;$/;"	m	struct:cmd_t
 pgid	parse.h	/^    pid_t           pgid;$/;"	m	struct:pipe_t
 pid	parse.h	/^    pid_t       pid;$/;"	m	struct:cmd_t
 pipe_t	parse.h	/^struct pipe_t {$/;"	s
-prCmd	main.c	/^static void prCmd(Cmd c)$/;"	f	file:
-prPipe	main.c	/^static void prPipe(Pipe p)$/;"	f	file:
-setup_pipes	execute.c	/^void setup_pipes(Cmd* c,int* pipes, int* fd_in, int* fd_out, int* fd_err)$/;"	f
+poll_pipe_status	job_control.c	/^void poll_pipe_status(Pipe *p)$/;"	f
+prCmd	print.c	/^void prCmd(Cmd c)$/;"	f
+prPipe	print.c	/^void prPipe(Pipe p)$/;"	f
+run_stopped	job_control.c	/^pid_t run_stopped()$/;"	f
+setup_pipes	execute.c	/^void setup_pipes(Cmd* c, int* pipes, int* fd_in, int* fd_out, int* fd_err)$/;"	f
 shell_pgid	execute.c	/^static pid_t shell_pgid = 0;$/;"	v	file:
 shell_pgid	execute.h	/^static pid_t shell_pgid;$/;"	v
 shell_pid	execute.c	/^static pid_t shell_pid = 0;$/;"	v	file:
 shell_pid	execute.h	/^static pid_t shell_pid;$/;"	v
 type	parse.h	/^    Ptype           type;$/;"	m	struct:pipe_t
+update_pipe_status	job_control.c	/^int update_pipe_status(Pipe *first_pipe, pid_t pid, int status)$/;"	f

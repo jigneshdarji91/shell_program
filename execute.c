@@ -304,27 +304,31 @@ void exec_pipe(Pipe *p)
 void exec_file(char* filename)
 {
     log_dbg("begin filename: %s", filename);
-    FILE* f = fopen(filename, "r");
-    Pipe p;
+
+    Pipe    p;
+    int     saved_fd_in  = dup(STDIN_FILENO);
+    int     saved_fd_out = dup(STDOUT_FILENO);
+
+    FILE*   f = fopen(filename, "r");
     if(f == NULL)
     {
         log_err("failed to open file: %s", filename);
         return;
     }
-    //int fd_stdin = dup(0);
-    char buff[1024];
 
-    dup2(fileno(f), 0);
+    int     line_count = 0, ch;
+    while ( (ch=fgetc(f)) != EOF ) {
+        if ( ch == '\n' )
+            line_count++;
+    }
+    fseek(f, 0, SEEK_SET);
+
+    log_dbg("ushrc lines: %d", line_count);
+    dup2(fileno(f), STDIN_FILENO);
     close(fileno(f));
 
-    while(1)
+    while(line_count > 0)
     {
-        if(fgets(buff, 1024, f) == NULL)
-        {
-            close(fileno(f));
-            break;
-        }
-        /*
         p = parse();
         Pipe p_exec = p;
         while(p_exec != NULL)
@@ -333,8 +337,12 @@ void exec_file(char* filename)
             p_exec = p_exec->next;
         }
         freePipe(p);
-        */
+        line_count--;
     }
+
+    dup2(saved_fd_in, STDIN_FILENO);
+    close(saved_fd_in);
+    fclose(f);
     log_dbg("end");
 }
 
