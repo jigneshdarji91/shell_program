@@ -28,7 +28,9 @@
 #include <sys/wait.h>
 #include "execute.h"
 #include "builtin.h"
+#include "print.h"
 
+#define DEFAULT_NICE 4
 static pid_t shell_pid = 0;
 static pid_t shell_pgid = 0;
 
@@ -129,6 +131,42 @@ void exec_pipe(Pipe *p)
     for(c = (*p)->head; c; c = c->next)
     {
         setup_pipes(&c, pipes, &fd_in, &fd_out, &fd_err);
+        if(!strcmp(c->args[0], "nice"))
+        {
+            long int niceval = 0;
+            int start_pos = 2;
+            char* endptr;
+            if(c->nargs > 0)
+            {
+                niceval = strtol(c->args[1], &endptr, 10);
+                if (*endptr != '\0')
+                {
+                    niceval = DEFAULT_NICE;
+                }
+            }
+            if(niceval == DEFAULT_NICE)
+            {
+                start_pos = 1;       
+            }
+
+            log_dbg("nice val: %ld start_pos: %d nargs: %d", niceval, start_pos, c->nargs);
+
+            int i = 0;
+            for(i = 0; i < c->nargs - start_pos; i++)
+            {
+                strcpy(c->args[i], c->args[i + start_pos]);
+            }
+
+            for(i = 0; i <= start_pos; i++)
+            {
+                c->args[c->nargs] = '\0';
+                free(c->args[c->nargs]);
+                (c->nargs)--;
+            }
+            log_dbg("nice val: %ld start_pos: %d nargs: %d", niceval, start_pos, c->nargs);
+            prCmd(c);
+        }
+
         if(is_builtin(c->args[0]) && c->next == NULL)
         {
             //builtin to be executed in the shell
@@ -202,6 +240,10 @@ void exec_pipe(Pipe *p)
                 {
                     log_err("process terminated abnormally status: %d", status);
                 }
+                else
+                {
+                    log_inf("process terminated normally status: %d", status);
+                }
             }
             tcsetpgrp(shell_pid, shell_pgid);
         }
@@ -214,12 +256,11 @@ void exec_pipe(Pipe *p)
             setpgid(cpid, ppid);
             if(Tamp != c->exec)
             {
-                //tcsetpgrp(cpid, (*p)->pgid);
-                //tcsetpgrp(cpid, shell_pgid);
+                tcsetpgrp(cpid, ppid);
             }
             else
             {
-                //tcsetpgrp(shell_pid, shell_pgid);
+                tcsetpgrp(shell_pid, shell_pgid);
             }
 
             if(fd_in != 0) 

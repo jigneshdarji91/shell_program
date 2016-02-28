@@ -21,6 +21,9 @@
 #include <string.h>
 #include <unistd.h>
 #include <stdlib.h>
+#include "job_control.h"
+#include <sys/types.h>
+#include <sys/wait.h>
 
 int is_builtin(char* cmd)
 {
@@ -119,11 +122,6 @@ int builtin_echo(Cmd* c)
     return 1; //FIXME: validations
 }
 
-int builtin_nice(Cmd* c)
-{
-
-}
-
 int builtin_pwd(Cmd* c)
 {
     char cwd[1024];
@@ -186,6 +184,11 @@ int builtin_fg(Cmd* c)
 }
 
 int builtin_bg(Cmd* c)
+{
+
+}
+
+int builtin_nice(Cmd* c)
 {
 
 }
