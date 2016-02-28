@@ -103,11 +103,26 @@ int builtin_logout(Cmd* c)
 
 int builtin_cd(Cmd* c)
 {
-    int retVal = chdir((*c)->args[1]);
-    char cwd[1024];
-    getcwd(cwd, 1024);
-    log_dbg("CWD: %s", cwd);
-    return retVal; //FIXME: validations and error messages
+    int retVal = 0;
+    log_dbg("begin nargs: %d", (*c)->nargs);
+    if((*c)->nargs == 2)
+    {
+        retVal = chdir((*c)->args[1]);
+        char cwd[1024];
+        getcwd(cwd, 1024);
+        log_dbg("CWD: %s", cwd);
+    }
+    else if((*c)->nargs == 1)
+    {
+        char *home;
+        home = getenv("HOME");
+        retVal = chdir(home);
+        char cwd[1024];
+        getcwd(cwd, 1024);
+        log_dbg("CWD: %s HOME: %s", cwd, home);
+    }
+
+    return retVal;
 }
 
 int builtin_echo(Cmd* c)
@@ -115,7 +130,6 @@ int builtin_echo(Cmd* c)
     int i;
     for(i = 1; i < (*c)->nargs; i++)
     {
-        //TODO: handle env variable
         if((*c)->args[i][0] == '$')
         {
             char cmd_str[1024];
@@ -148,11 +162,10 @@ int builtin_pwd(Cmd* c)
 int builtin_setenv(Cmd* c)
 {
     log_dbg();
-    //FIXME: validations
     if((*c)->nargs == 2)
         return setenv((*c)->args[1], (*c)->args[2], 1);
     else
-        return setenv((*c)->args[1], (char *)" ", 1); //FIXME: set the string to blank
+        return setenv((*c)->args[1], (char *)" ", 1); 
 }
 
 int builtin_unsetenv(Cmd* c)
