@@ -29,8 +29,8 @@
 #include "execute.h"
 #include "builtin.h"
 #include "print.h"
+#include <sys/resource.h>
 
-#define DEFAULT_NICE 4
 static pid_t shell_pid = 0;
 static pid_t shell_pgid = 0;
 
@@ -126,6 +126,9 @@ void exec_pipe(Pipe *p)
     int     old_fd_in = dup(0);
     int     old_fd_out = dup(1);
     int     old_fd_err = dup(2);
+    int     nice_flag = 0;
+    long int niceval    = 0;
+    long int niceold    = 0;
 
 
     for(c = (*p)->head; c; c = c->next)
@@ -133,44 +136,23 @@ void exec_pipe(Pipe *p)
         setup_pipes(&c, pipes, &fd_in, &fd_out, &fd_err);
         if(!strcmp(c->args[0], "nice"))
         {
-            long int niceval = 0;
-            int start_pos = 2;
-            char* endptr;
-            if(c->nargs > 0)
-            {
-                niceval = strtol(c->args[1], &endptr, 10);
-                if (*endptr != '\0')
-                {
-                    niceval = DEFAULT_NICE;
-                }
-            }
-            if(niceval == DEFAULT_NICE)
-            {
-                start_pos = 1;       
-            }
-
-            log_dbg("nice val: %ld start_pos: %d nargs: %d", niceval, start_pos, c->nargs);
-
-            int i = 0;
-            for(i = 0; i < c->nargs - start_pos; i++)
-            {
-                strcpy(c->args[i], c->args[i + start_pos]);
-            }
-
-            for(i = 0; i <= start_pos; i++)
-            {
-                c->args[c->nargs] = '\0';
-                free(c->args[c->nargs]);
-                (c->nargs)--;
-            }
-            log_dbg("nice val: %ld start_pos: %d nargs: %d", niceval, start_pos, c->nargs);
-            prCmd(c);
+            builtin_nice(&c, &niceval);
+            nice_flag = 1;
         }
 
         if(is_builtin(c->args[0]) && c->next == NULL)
         {
             //builtin to be executed in the shell
             //if it's last in the pipeline(or alone)
+            
+
+            if(nice_flag)
+            {
+                //set priority
+                niceold     =  getpriority(PRIO_PROCESS, 0);
+                setpriority(PRIO_PROCESS, 0, niceval);
+            }
+
             if(fd_in != 0) 
             {
                 fflush(stdin);
@@ -216,6 +198,11 @@ void exec_pipe(Pipe *p)
             }
             //fd_in = pipes[0];
             log_inf("fd_in: %d fd_out:%d fd_err: %d", fd_in, fd_out, fd_err);
+            if(nice_flag)
+            {
+                //reset priority
+                setpriority(PRIO_PROCESS, 0, niceold);
+            }
             break;
         }
 
@@ -249,6 +236,11 @@ void exec_pipe(Pipe *p)
         }
         else if(pid == 0)
         {
+            if(nice_flag)
+            {
+                //set priority
+                setpriority(PRIO_PROCESS, 0, niceval);
+            }
             log_dbg("child");
             pid_t cpid = getpid();
             pid_t ppid = getppid();

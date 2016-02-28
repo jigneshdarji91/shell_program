@@ -18,12 +18,15 @@
 
 #include "builtin.h"
 #include "debug.h"
+#include "print.h"
 #include <string.h>
 #include <unistd.h>
 #include <stdlib.h>
 #include "job_control.h"
 #include <sys/types.h>
 #include <sys/wait.h>
+
+#define DEFAULT_NICE 4
 
 int is_builtin(char* cmd)
 {
@@ -59,10 +62,6 @@ int exec_builtin(Cmd* c)
     if(!strcmp((*c)->args[0], "echo"))
     {
         return builtin_echo(c);
-    }
-    if(!strcmp((*c)->args[0], "nice"))
-    {
-        return builtin_nice(c);
     }
     if(!strcmp((*c)->args[0], "pwd"))
     {
@@ -188,8 +187,39 @@ int builtin_bg(Cmd* c)
 
 }
 
-int builtin_nice(Cmd* c)
+int builtin_nice(Cmd* c, long int* niceval)
 {
+    int start_pos = 2;
+    char* endptr;
+    if((*c)->nargs > 0)
+    {
+        *niceval = strtol((*c)->args[1], &endptr, 10);
+        if (*endptr != '\0')
+        {
+            *niceval = DEFAULT_NICE;
+        }
+    }
+    if(*niceval == DEFAULT_NICE)
+    {
+        start_pos = 1;       
+    }
+
+    log_dbg("nice val: %ld start_pos: %d nargs: %d", *niceval, start_pos, (*c)->nargs);
+
+    int i = 0;
+    for(i = 0; i < (*c)->nargs - start_pos; i++)
+    {
+        strcpy((*c)->args[i], (*c)->args[i + start_pos]);
+    }
+
+    for(i = 0; i <= start_pos; i++)
+    {
+        (*c)->args[(*c)->nargs] = '\0';
+        free((*c)->args[(*c)->nargs]);
+        ((*c)->nargs)--;
+    }
+    log_dbg("nice val: %ld start_pos: %d nargs: %d", *niceval, start_pos, (*c)->nargs);
+    prCmd(*c);
 
 }
 

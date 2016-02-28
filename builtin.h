@@ -23,7 +23,7 @@ int exec_builtin(Cmd *p);
 int builtin_logout(Cmd* c);
 int builtin_cd(Cmd* c);
 int builtin_echo(Cmd* c);
-int builtin_nice(Cmd* c);
+int builtin_nice(Cmd* c, long int*);
 int builtin_pwd(Cmd* c);
 int builtin_setenv(Cmd* c);
 int builtin_unsetenv(Cmd* c);
