@@ -25,6 +25,7 @@
 #include "job_control.h"
 #include <sys/types.h>
 #include <sys/wait.h>
+#include <sys/stat.h>
 
 #define DEFAULT_NICE 4
 
@@ -162,10 +163,29 @@ int builtin_unsetenv(Cmd* c)
 
 int builtin_where(Cmd* c)
 {
-    if((*c)->nargs > 1
-        && is_builtin((*c)->args[1]))
+    if((*c)->nargs > 1)
     {
-        printf("%s is a shell built-in\n", (*c)->args[1]);
+        if(is_builtin((*c)->args[1]))
+        {
+            printf("%s is a shell built-in\n", (*c)->args[1]);
+        }
+
+        char path[1024];
+        struct stat st;
+        strcpy(path, getenv("PATH"));
+        char* path_split    = strtok(path, ":");
+        char cmd_path[1024];
+        while(path_split != NULL)
+        {
+            strcpy(cmd_path, path_split);
+            strcat(cmd_path, "/");
+            strcat(cmd_path, (*c)->args[1]);
+            path_split = strtok(NULL, ":");
+            if(stat(cmd_path, &st) == 0)
+            {
+                printf("%s\n", cmd_path);
+            }
+        }
     }
 }
 
