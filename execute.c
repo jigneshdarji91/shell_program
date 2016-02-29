@@ -216,23 +216,6 @@ void exec_pipe(Pipe *p)
                 (*p)->pgid = pid;
             setpgid(pid, (*p)->pgid);
 
-            //if pipe is FG and last command
-            if((*p)->fg && c->next == NULL)
-            {
-                log_dbg("child is FG");
-                int     status = 0;
-                pid_t   cpid;
-                waitpid(- (*p)->pgid, &status, WUNTRACED);
-                if(0 != status)
-                {
-                    log_err("process terminated abnormally status: %d", status);
-                }
-                else
-                {
-                    log_inf("process terminated normally status: %d", status);
-                }
-            }
-            tcsetpgrp(shell_pid, shell_pgid);
         }
         else if(pid == 0)
         {
@@ -244,18 +227,14 @@ void exec_pipe(Pipe *p)
             log_dbg("child");
             pid_t cpid = getpid();
             pid_t ppid = getppid();
-            enable_signal();
             if((*p)->pgid == 0)
                 (*p)->pgid = cpid;
             setpgid(cpid, (*p)->pgid);
-            if(Tamp != c->exec)
+            if((*p)->fg)
             {
-                tcsetpgrp(cpid, ppid);
+                tcsetpgrp(cpid, (*p)->pgid);
             }
-            else
-            {
-                tcsetpgrp(shell_pid, shell_pgid);
-            }
+            enable_signal();
 
             if(fd_in != 0) 
             {
@@ -300,6 +279,24 @@ void exec_pipe(Pipe *p)
             close(fd_err);
         fd_in = pipes[0];
     }
+
+    //if pipe is FG and last command
+    if((*p)->fg)
+    {
+        log_dbg("child is FG");
+        int     status = 0;
+        pid_t   cpid;
+        waitpid(- (*p)->pgid, &status, WUNTRACED);
+        if(0 != status)
+        {
+            log_err("process terminated abnormally status: %d", status);
+        }
+        else
+        {
+            log_inf("process terminated normally status: %d", status);
+        }
+    }
+    tcsetpgrp(shell_pid, shell_pgid);
     log_inf("end");
 }
 
@@ -360,4 +357,4 @@ int is_pipe_fg(Pipe *p)
     log_dbg("pipe is fg: %d", fg);
     return fg;
 }
-        
+

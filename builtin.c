@@ -94,6 +94,7 @@ int exec_builtin(Cmd* c)
         retVal = builtin_bg(c);
     }
 
+    return retVal;
 }
 
 int builtin_logout(Cmd* c)
