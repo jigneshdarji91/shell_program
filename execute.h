@@ -15,10 +15,15 @@
  *
  * =====================================================================================
  */
+
+#ifndef __EXECUTE_H__
+#define __EXECUTE_H__
 #include "parse.h"
 
-static pid_t shell_pid;
-static pid_t shell_pgid;
+extern pid_t shell_pid;
+extern pid_t shell_pgid;
+extern int   shell_fd;
+extern struct termios shell_terminal_modes;
 
 void disable_signal();
 void enable_signal();
@@ -27,3 +32,4 @@ void exec_pipe(Pipe*);
 void exec_file(char*);
 void setup_pipes(Cmd*, int*, int*, int*, int*);
 int  is_pipe_fg(Pipe*);
+#endif /*__EXECUTE_H__ */

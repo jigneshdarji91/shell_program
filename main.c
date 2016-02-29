@@ -40,7 +40,7 @@ int main(int argc, char *argv[])
     while ( 1 ) {
         if(first_run == 1)
         {
-            exec_file(ushrc_file); //FIXME: exec ushrc
+            exec_file(ushrc_file);
             first_run = 0;
         }
         else

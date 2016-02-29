@@ -34,6 +34,7 @@ int is_builtin(char* cmd)
     if(!(strcmp(cmd, "cd")
         && strcmp(cmd, "echo")
         && strcmp(cmd, "logout")
+        && strcmp(cmd, "end")
         && strcmp(cmd, "nice")
         && strcmp(cmd, "pwd")
         && strcmp(cmd, "setenv")
@@ -56,6 +57,10 @@ int exec_builtin(Cmd* c)
     if(!strcmp((*c)->args[0], "logout"))
     {
         retVal = builtin_logout(c);
+    }
+    if(!strcmp((*c)->args[0], "end"))
+    {
+        retVal = 0;
     }
     if(!strcmp((*c)->args[0], "cd"))
     {

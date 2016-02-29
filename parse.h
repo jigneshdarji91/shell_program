@@ -12,6 +12,7 @@
 #define PARSE_H
 
 #include <sys/types.h> 
+#include <termios.h>
 
 /* list of all tokens */
 typedef enum {
@@ -58,6 +59,7 @@ typedef enum {Pout, PoutErr} Ptype;
  */
 struct pipe_t {
     pid_t           pgid;
+    struct termios  terminal_mode;
     int             fg;
     Ptype           type;
     Cmd             head;

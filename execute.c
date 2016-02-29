@@ -28,11 +28,15 @@
 #include <sys/wait.h>
 #include "execute.h"
 #include "builtin.h"
+#include "job_control.h"
 #include "print.h"
 #include <sys/resource.h>
+#include <termios.h>
 
-static pid_t shell_pid = 0;
-static pid_t shell_pgid = 0;
+pid_t           shell_pid  = 0;;
+pid_t           shell_pgid = 0;;
+int             shell_fd   = 0;;
+struct termios  shell_terminal_modes;
 
 void disable_signal()
 {
@@ -58,13 +62,19 @@ void init_shell()
 {
     shell_pid = getpid();
     shell_pgid  = shell_pid;
-    setpgid(shell_pid, shell_pgid);
-    tcsetpgrp(shell_pid, shell_pgid);
+    shell_fd    = STDIN_FILENO;
     disable_signal();
+    setpgid(shell_pid, shell_pgid);
+    log_inf("tcsetpgrp pgid: %d", shell_pgid);
+    tcsetpgrp(shell_fd, shell_pgid);
+    tcgetattr(shell_fd, &shell_terminal_modes);
 }
 
 void setup_pipes(Cmd* c, int* pipes, int* fd_in, int* fd_out, int* fd_err)
 {
+    fflush(stdin);
+    fflush(stdout);
+    fflush(stderr);
     if(Tin == (*c)->in)
         *fd_in = open((*c)->infile, O_RDONLY);
     if((*c)->next)
@@ -129,8 +139,8 @@ void exec_pipe(Pipe *p)
     int     nice_flag = 0;
     long int niceval    = 0;
     long int niceold    = 0;
-    (*p)->fg = is_pipe_fg(p);
 
+    (*p)->fg = is_pipe_fg(p);
 
     for(c = (*p)->head; c; c = c->next)
     {
@@ -211,20 +221,18 @@ void exec_pipe(Pipe *p)
         {
             log_dbg("parent");
             c->pid = pid;
-            //pid_t pgid = getpid();
-            if(!(*p)->pgid)
+            if((*p)->pgid == 0)
                 (*p)->pgid = pid;
             setpgid(pid, (*p)->pgid);
-
         }
         else if(pid == 0)
         {
+            log_dbg("child begin cmd: %s pid: %d", c->args[0], getpid());
             if(nice_flag)
             {
                 //set priority
                 setpriority(PRIO_PROCESS, 0, niceval);
             }
-            log_dbg("child");
             pid_t cpid = getpid();
             pid_t ppid = getppid();
             if((*p)->pgid == 0)
@@ -232,7 +240,13 @@ void exec_pipe(Pipe *p)
             setpgid(cpid, (*p)->pgid);
             if((*p)->fg)
             {
-                tcsetpgrp(cpid, (*p)->pgid);
+                log_inf("tcsetpgrp pgid: %d", (*p)->pgid);
+                tcsetpgrp(shell_fd, (*p)->pgid);
+            }
+            else
+            {
+                log_inf("tcsetpgrp pgid: %d", shell_pgid);
+                tcsetpgrp(shell_fd, shell_pgid);
             }
             enable_signal();
 
@@ -280,23 +294,10 @@ void exec_pipe(Pipe *p)
         fd_in = pipes[0];
     }
 
-    //if pipe is FG and last command
     if((*p)->fg)
-    {
-        log_dbg("child is FG");
-        int     status = 0;
-        pid_t   cpid;
-        waitpid(- (*p)->pgid, &status, WUNTRACED);
-        if(0 != status)
-        {
-            log_err("process terminated abnormally status: %d", status);
-        }
-        else
-        {
-            log_inf("process terminated normally status: %d", status);
-        }
-    }
-    tcsetpgrp(shell_pid, shell_pgid);
+        run_in_fg(p, 0);
+    else    
+        run_in_bg(p, 0);
     log_inf("end");
 }
 
@@ -347,14 +348,16 @@ void exec_file(char* filename)
 
 int is_pipe_fg(Pipe *p)
 {
+    if(p == NULL)
+        return 0;
     int fg = 0;
     Cmd c = (*p)->head;
     if(c == NULL)
         return 0;
-    while(c->next) c = c->next;
+    while(c->next) 
+        c = c->next;
     if(c != NULL && c->exec != Tamp)
         fg = 1;
-    log_dbg("pipe is fg: %d", fg);
     return fg;
 }
 
