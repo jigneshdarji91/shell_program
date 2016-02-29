@@ -58,6 +58,7 @@ typedef enum {Pout, PoutErr} Ptype;
  */
 struct pipe_t {
     pid_t           pgid;
+    int             fg;
     Ptype           type;
     Cmd             head;
     struct pipe_t   *next;

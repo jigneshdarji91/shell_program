@@ -227,6 +227,7 @@ static Pipe mkPipe()
     p->type = Pout;	// set type to Pout until we know differently
     p->head = c;
     p->pgid = 0;
+    p->fg   = 0;
 
     while ( PipeToken(LA) ) {
         if ( LA == TpipeErr )

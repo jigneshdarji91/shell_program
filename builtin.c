@@ -52,45 +52,46 @@ int is_builtin(char* cmd)
 int exec_builtin(Cmd* c)
 {
     log_dbg("begin cmd: %s", (*c)->args[0]);
+    int retVal = 0;
     if(!strcmp((*c)->args[0], "logout"))
     {
-        return builtin_logout(c);
+        retVal = builtin_logout(c);
     }
     if(!strcmp((*c)->args[0], "cd"))
     {
-        return builtin_cd(c);
+        retVal = builtin_cd(c);
     }
     if(!strcmp((*c)->args[0], "echo"))
     {
-        return builtin_echo(c);
+        retVal = builtin_echo(c);
     }
     if(!strcmp((*c)->args[0], "pwd"))
     {
-        return builtin_pwd(c);
+        retVal = builtin_pwd(c);
     }
     if(!strcmp((*c)->args[0], "setenv"))
     {
-        return builtin_setenv(c);
+        retVal = builtin_setenv(c);
     }
     if(!strcmp((*c)->args[0], "unsetenv"))
     {
-        return builtin_unsetenv(c);
+        retVal = builtin_unsetenv(c);
     }
     if(!strcmp((*c)->args[0], "where"))
     {
-        return builtin_where(c);
+        retVal = builtin_where(c);
     }
     if(!strcmp((*c)->args[0], "kill"))
     {
-        return builtin_kill(c);
+        retVal = builtin_kill(c);
     }
     if(!strcmp((*c)->args[0], "fg"))
     {
-        return builtin_fg(c);
+        retVal = builtin_fg(c);
     }
     if(!strcmp((*c)->args[0], "bg"))
     {
-        return builtin_bg(c);
+        retVal = builtin_bg(c);
     }
 
 }

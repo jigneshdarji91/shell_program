@@ -129,6 +129,7 @@ void exec_pipe(Pipe *p)
     int     nice_flag = 0;
     long int niceval    = 0;
     long int niceold    = 0;
+    (*p)->fg = is_pipe_fg(p);
 
 
     for(c = (*p)->head; c; c = c->next)
@@ -144,7 +145,6 @@ void exec_pipe(Pipe *p)
         {
             //builtin to be executed in the shell
             //if it's last in the pipeline(or alone)
-            
 
             if(nice_flag)
             {
@@ -211,18 +211,18 @@ void exec_pipe(Pipe *p)
         {
             log_dbg("parent");
             c->pid = pid;
-            pid_t pgid = getpid();
+            //pid_t pgid = getpid();
             if(!(*p)->pgid)
                 (*p)->pgid = pid;
             setpgid(pid, (*p)->pgid);
 
-            //if cmd is FG, wait
-            if(Tamp != c->exec)
+            //if pipe is FG and last command
+            if((*p)->fg && c->next == NULL)
             {
                 log_dbg("child is FG");
                 int     status = 0;
                 pid_t   cpid;
-                waitpid(pid, &status, WUNTRACED);
+                waitpid(- (*p)->pgid, &status, WUNTRACED);
                 if(0 != status)
                 {
                     log_err("process terminated abnormally status: %d", status);
@@ -245,7 +245,9 @@ void exec_pipe(Pipe *p)
             pid_t cpid = getpid();
             pid_t ppid = getppid();
             enable_signal();
-            setpgid(cpid, ppid);
+            if((*p)->pgid == 0)
+                (*p)->pgid = cpid;
+            setpgid(cpid, (*p)->pgid);
             if(Tamp != c->exec)
             {
                 tcsetpgrp(cpid, ppid);
@@ -346,3 +348,16 @@ void exec_file(char* filename)
     log_dbg("end");
 }
 
+int is_pipe_fg(Pipe *p)
+{
+    int fg = 0;
+    Cmd c = (*p)->head;
+    if(c == NULL)
+        return 0;
+    while(c->next) c = c->next;
+    if(c != NULL && c->exec != Tamp)
+        fg = 1;
+    log_dbg("pipe is fg: %d", fg);
+    return fg;
+}
+        

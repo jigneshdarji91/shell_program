@@ -26,3 +26,4 @@ void init_shell();
 void exec_pipe(Pipe*);
 void exec_file(char*);
 void setup_pipes(Cmd*, int*, int*, int*, int*);
+int  is_pipe_fg(Pipe*);
