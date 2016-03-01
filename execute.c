@@ -155,6 +155,8 @@ void exec_pipe(Pipe *p)
         {
             //builtin to be executed in the shell
             //if it's last in the pipeline(or alone)
+            if((*p)->pgid == 0)
+                (*p)->pgid = getpid();
 
             if(nice_flag)
             {
@@ -166,18 +168,21 @@ void exec_pipe(Pipe *p)
             if(fd_in != 0) 
             {
                 fflush(stdin);
+                log_dbg("dup2 fd_in: %d to stdin", fd_in);
                 dup2(fd_in, 0);
                 close(fd_in);
             }
             if(fd_out != 1) 
             {
                 fflush(stdout);
+                log_dbg("dup2 fd_out: %d to stdout", fd_out);
                 dup2(fd_out, 1);
                 close(fd_out);
             }
             if(fd_err != 2)
             {
                 fflush(stderr);
+                log_dbg("dup2 fd_err: %d to stderr", fd_err);
                 dup2(fd_err, 2);
                 close(fd_err);
             }
@@ -189,6 +194,7 @@ void exec_pipe(Pipe *p)
             {
                 fflush(stdin);
                 close(fd_in);
+                log_dbg("dup2 fd_in: %d to stdin", old_fd_in);
                 dup2(old_fd_in, 0);
                 close(old_fd_in);
             }
@@ -196,6 +202,7 @@ void exec_pipe(Pipe *p)
             {
                 fflush(stdout);
                 close(fd_out);
+                log_dbg("dup2 old_fd_out: %d to stdout", old_fd_out);
                 dup2(old_fd_out, 1);
                 close(old_fd_out);
             }
@@ -203,6 +210,7 @@ void exec_pipe(Pipe *p)
             {
                 fflush(stderr);
                 close(fd_err);
+                log_dbg("dup2 old_fd_err: %d to stderr", old_fd_err);
                 dup2(old_fd_err, 2);
                 close(old_fd_err);
             }
@@ -223,7 +231,8 @@ void exec_pipe(Pipe *p)
             c->pid = pid;
             if((*p)->pgid == 0)
                 (*p)->pgid = pid;
-            setpgid(pid, (*p)->pgid);
+            setpgid(c->pid, (*p)->pgid);
+            log_dbg("pid: %d pgid: %d", c->pid, (*p)->pgid);
         }
         else if(pid == 0)
         {
@@ -234,10 +243,11 @@ void exec_pipe(Pipe *p)
                 setpriority(PRIO_PROCESS, 0, niceval);
             }
             pid_t cpid = getpid();
-            pid_t ppid = getppid();
+            c->pid = cpid;
             if((*p)->pgid == 0)
                 (*p)->pgid = cpid;
             setpgid(cpid, (*p)->pgid);
+            log_dbg("pid: %d pgid: %d", c->pid, (*p)->pgid);
             if((*p)->fg)
             {
                 log_inf("tcsetpgrp pgid: %d", (*p)->pgid);
@@ -252,16 +262,19 @@ void exec_pipe(Pipe *p)
 
             if(fd_in != 0) 
             {
+                log_dbg("dup2 fd_in: %d to stdin", fd_in);
                 dup2(fd_in, 0);
                 close(fd_in);
             }
             if(fd_out != 1) 
             {
+                log_dbg("dup2 fd_out: %d to stdout", fd_out);
                 dup2(fd_out, 1);
                 close(fd_out);
             }
             if(fd_err != 2)
             {
+                log_dbg("dup2 fd_err: %d to stderr", fd_err);
                 dup2(fd_err, 2);
                 close(fd_err);
             }
@@ -324,11 +337,14 @@ void exec_file(char* filename)
     fseek(f, 0, SEEK_SET);
 
     log_dbg("ushrc lines: %d", line_count);
+
+    log_dbg("dup2 fd_in: %d to stdin", fileno(f));
     dup2(fileno(f), STDIN_FILENO);
     close(fileno(f));
 
     while(line_count > 0)
     {
+        fflush(stdout);
         p = parse();
         Pipe p_exec = p;
         while(p_exec != NULL)
@@ -340,6 +356,7 @@ void exec_file(char* filename)
         line_count--;
     }
 
+    log_dbg("dup2 fd_in: %d to stdin", saved_fd_in);
     dup2(saved_fd_in, STDIN_FILENO);
     close(saved_fd_in);
     fclose(f);

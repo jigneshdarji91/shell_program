@@ -41,6 +41,7 @@ int main(int argc, char *argv[])
         if(first_run == 1)
         {
             exec_file(ushrc_file);
+            fflush(stdin);
             first_run = 0;
         }
         else

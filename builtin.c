@@ -61,6 +61,7 @@ int exec_builtin(Cmd* c)
     if(!strcmp((*c)->args[0], "end"))
     {
         retVal = 0;
+        //exit(0);  
     }
     if(!strcmp((*c)->args[0], "cd"))
     {
