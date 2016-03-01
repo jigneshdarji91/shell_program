@@ -21,6 +21,7 @@
 *.dylib
 
 # Executables
+ush
 *.exe
 *.out
 *.app
@@ -35,6 +36,7 @@
 
 #ctags
 tags
+
 
 #swap
 *.swp
