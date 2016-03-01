@@ -22,12 +22,15 @@
 #include <string.h>
 #include <unistd.h>
 #include <stdlib.h>
+#include <stdio.h>
 #include "job_control.h"
 #include <sys/types.h>
 #include <sys/wait.h>
 #include <sys/stat.h>
 
 #define DEFAULT_NICE 4
+
+extern char **environ;
 
 int is_builtin(char* cmd)
 {
@@ -170,10 +173,22 @@ int builtin_pwd(Cmd* c)
 int builtin_setenv(Cmd* c)
 {
     log_dbg();
-    if((*c)->nargs == 2)
+    if((*c)->nargs == 3)
         return setenv((*c)->args[1], (*c)->args[2], 1);
-    else
+    else if((*c)->nargs == 2)
         return setenv((*c)->args[1], (char *)" ", 1); 
+    else if((*c)->nargs == 1)
+    {
+        int i = 1;
+        char *s = *environ;
+
+        for (; s; i++) {
+            printf("%s\n", s);
+            s = *(environ+i);
+        }
+
+        return 0;
+    }
 }
 
 int builtin_unsetenv(Cmd* c)
