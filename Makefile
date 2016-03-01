@@ -5,14 +5,14 @@
 
 CC=gcc
 CFLAGS=-g
-SRC=main.c parse.c parse.h execute.c execute.h builtin.c builtin.h job_control.c job_control.h print.c print.h
+SRC=main.c parse.c parse.h execute.c execute.h builtin.c builtin.h job_control.c job_control.h print.c print.h debug.h
 OBJ=main.o parse.o builtin.o execute.o job_control.o print.o
 
 ush:	$(OBJ)
 	$(CC) -o $@ $(OBJ)
 
 tar:
-	tar czvf ush.tar.gz $(SRC) Makefile README
+	tar czvf ush.tar.gz $(SRC) Makefile README REFERENCES
 
 clean:
 	\rm $(OBJ) ush
